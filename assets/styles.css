@@ -40,21 +40,56 @@
     font-display: swap;
 }
 
-.header {
-
+body {
     --header-bg: #20BF55;
     --header-img-logo-height: 40px;
 
+    --btn-start-game-bg: #EA7E5D;
+    --btn-start-game-bc: var(--header-bg);
+    --btn-start-game-bx: #7E2A10;
+}
+
+.header {
     display: flex;
     flex-direction: row;
     gap: 10px;
     align-items: center;
     justify-content: center;
-    
+
     padding: 10px;
     background-color: var(--header-bg);
 }
 
 .img-header-logo {
     height: var(--header-img-logo-height);
+}
+
+.main {
+    display: flex;
+    flex-direction: column;
+}
+
+.btn-start-game {
+    margin: 10px auto;
+    padding: 10px 20px;
+
+    font-size: 14px;
+    font-weight: bold;
+
+    background-color: var(--btn-start-game-bg);
+    border: 2px solid var(--btn-start-game-bc);
+    border-radius: 50px;
+
+    transition: all 0.1s ease-in-out;
+}
+
+.btn-start-game:hover {
+    transform: scale(1.02);
+    box-shadow: 3px 3px 5px -1px var(--btn-start-game-bx);
+}
+
+.btn-start-game:active {
+    transform: scale(0.98);
+    box-shadow: none;
+
 }
