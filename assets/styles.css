@@ -47,6 +47,10 @@ body {
     --btn-start-game-bg: #EA7E5D;
     --btn-start-game-bc: var(--header-bg);
     --btn-start-game-bx: #7E2A10;
+
+    --body-bg: #BCB2E6;
+    
+    background-color: var(--body-bg);
 }
 
 .header {
