@@ -2,3 +2,23 @@
     margin: 0;
     padding: 0;
 }
+
+
+.header {
+
+    --header-bg: #20BF55;
+    --header-img-logo-height: 40px;
+
+    display: flex;
+    flex-direction: row;
+    gap: 10px;
+    align-items: center;
+    justify-content: center;
+    
+    padding: 10px;
+    background-color: var(--header-bg);
+}
+
+.img-header-logo {
+    height: var(--header-img-logo-height);
+}
