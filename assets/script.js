@@ -6,19 +6,26 @@ function debug(...args) {
     }
 }
 
-function gameBoard() {
-    let boardArr = [[], [], []];
+const gameBoard = (() => {
+    const EMPTY = null;
+
+    let boardArr = [
+        [EMPTY, EMPTY, EMPTY],
+        [EMPTY, EMPTY, EMPTY],
+        [EMPTY, EMPTY, EMPTY]
+    ];
 
     const printBoard = () => {
         debug(boardArr);
     }
 
+    const checkWin = () => {
+
+    };
+
     return {
         printBoard,
     };
-}
+})();
 
-
-
-const board = gameBoard();
-board.printBoard();
+gameBoard.printBoard();
