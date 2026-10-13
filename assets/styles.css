@@ -45,11 +45,11 @@ body {
     --logo-height: 40px;
 
     --btn-start-bg: #EA7E5D;
-    --btn-start-bc: var(--header-bg);
+    --btn-start-bc: #ffffff;
     --btn-start-bx: #7E2A10;
 
     --body-bg: #BCB2E6;
-    
+
     background-color: var(--body-bg);
 }
 
@@ -99,6 +99,8 @@ body {
 }
 
 .board {
+    --cell-bg: #ffffff;
+
     aspect-ratio: 1;
     align-self: center;
     width: min(50vw, 400px);
@@ -112,5 +114,5 @@ body {
 
 
 .cell {
-    background-color: white;
+    background-color: var(--cell-bg);
 }
