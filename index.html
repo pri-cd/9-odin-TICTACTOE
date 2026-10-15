@@ -38,13 +38,37 @@
 
             <div class="player-1 player-input" id="player-1">
                 <label for="player-1-name">Name (P1):</label>
-                <input type="text" name="name" id="player-1-name" placeholder="Player 1">
-            </div>
-            <div class="player-2 player-input" id="player-2">
-                <label for="player-2-name">Name (P2):</label>
-                <input type="text" name="name" id="player-2-name" placeholder="Player 2">
+                <input type="text" name="p1-name" id="player-1-name" placeholder="Player 1">
+                <label>Choose Mark:</label>
+                <div class="choose-mark">
+                    <div class="choose-X-mark">
+                        <input class="radio-inp" type="radio" name="p1-mark" id="p1-X" value="X" checked>
+                        <label for="p1-X"><img src="./assets/icons/X.png" alt=""></label>
+                    </div>
+                    <div class="choose-O-mark">
+                        <input class="radio-inp" type="radio" name="p1-mark" id="p1-O" value="O">
+                        <label for="p1-O"><img src="./assets/icons/O.png" alt=""></label>
+                    </div>
+                </div>
             </div>
 
+            <div class="player-2 player-input" id="player-2">
+                <label for="player-2-name">Name (P2):</label>
+                <input type="text" name="p2-name" id="player-2-name" placeholder="Player 2">
+                <label>Choose Mark:</label>
+                <div class="choose-mark">
+                    <div class="choose-X-mark">
+                        <input class="radio-inp" type="radio" name="p2-mark" id="p2-X" value="X">
+                        <label for="p2-X"><img src="./assets/icons/X.png" alt=""></label>
+                    </div>
+                    <div class="choose-O-mark">
+                        <input class="radio-inp" type="radio" name="p2-mark" id="p2-O" value="O" checked>
+                        <label for="p2-O"><img src="./assets/icons/O.png" alt=""></label>
+                    </div>
+                </div>
+            </div>
+
+            <p class="dialog-error" id="dialog-error"></p>
             <div class="submit">
                 <button id="btn-submit-p-names" type="button">Submit</button>
             </div>
