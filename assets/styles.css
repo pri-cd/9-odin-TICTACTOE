@@ -126,6 +126,7 @@ body {
 
 .player-dialog {
     --logo-height: 30px;
+    --mark-height: 15px;
 
     margin: auto;
     padding: 10px 30px;
@@ -143,8 +144,7 @@ body {
     background: rgb(0 0 0 / 0.8);
 }
 
-.dialog-header
-{
+.dialog-header {
     display: grid;
     grid-auto-flow: column;
     grid-template-columns: auto 1fr;
@@ -152,9 +152,8 @@ body {
     align-items: center;
 }
 
-.dialog-header h2
-{
-    font-size: 24px;   
+.dialog-header h2 {
+    font-size: 24px;
 }
 
 .dialog-header img {
@@ -163,11 +162,14 @@ body {
 
 .player-input {
     --input-bg: #CACCCE;
+    --radio-bg: #a39898;
+    --radio-border: #000000;
 
     display: grid;
     grid-template-columns: auto 1fr;
-    grid-template-rows: repeat(1fr);
-    gap: 30px;
+    grid-template-rows: repeat(2, 1fr);
+    row-gap: 10px;
+    column-gap: 30px;
 
     align-items: center;
 }
@@ -188,6 +190,37 @@ body {
     background-color: var(--input-bg);
 
     font-size: 14px;
+}
+
+.player-input img {
+    height: var(--mark-height);
+}
+
+.choose-mark {
+    display: grid;
+    grid-auto-flow: column;
+    grid-template-columns: repeat(2, 1fr);
+}
+
+.choose-mark label {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+}
+
+.choose-X-mark,
+.choose-O-mark {
+    display: flex;
+    flex-direction: row;
+    gap: 5px;
+}
+
+.dialog-error {
+    font-size: 12px;
+    align-self: center;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: rgb(255, 0, 0);
 }
 
 .submit {
