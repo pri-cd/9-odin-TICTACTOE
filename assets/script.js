@@ -25,12 +25,8 @@ const gameBoard = (() => {
         debug(boardArr);
     };
 
-    const checkWin = () => {
-    };
-
     return {
-        printBoard,
-        checkWin
+        printBoard
     };
 })();
 
