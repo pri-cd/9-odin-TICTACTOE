@@ -104,6 +104,7 @@ body {
 .board {
     --cell-bg: #ffffff;
     --board-shadow: #32292F;
+    --cell-hover-bg: #C0C2C4;
 
     aspect-ratio: 1;
     align-self: center;
@@ -121,6 +122,17 @@ body {
 
 .cell {
     background-color: var(--cell-bg);
+    border: none;
+    transition: all 0.1s ease-in-out;
+}
+
+.cell:hover {
+    transform: scale(1.02);
+    background-color: var(--cell-hover-bg);
+}
+
+.cell:active {
+    transform: scale(0.98);
 }
 
 
