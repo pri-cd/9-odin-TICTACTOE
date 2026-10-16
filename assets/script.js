@@ -141,7 +141,7 @@ const gameLogic = (() => {
 
     /**
      * 
-     * @param {boardArr} boardMatrix 
+     * @param {Array} boardMatrix 
      * @returns {boolean} win
      */
     const checkRowWin = (boardMatrix) => {
@@ -161,7 +161,7 @@ const gameLogic = (() => {
      * Note: I didn't replace it with .map().. because I understand my code!.
      * 
      * Then, sends data to checkRowWin() ---> 
-     * @param {boardArr} boardMatrix 
+     * @param {Array} boardMatrix 
      */
     const checkColWin = (boardMatrix) => {
         let colMatrix = [[], [], []];
@@ -174,6 +174,24 @@ const gameLogic = (() => {
         return checkRowWin(colMatrix);
     };
 
+    /**
+     * Checks the win condition in diagonal cases...
+     * The first loop gets.. top-left to bottom-right diagonal..
+     * And, hardcoded the other side of diagonal..
+     * @param {Array} boardMatrix 
+     */
+    const checkDiagWin = (boardMatrix) => {
+        let diagMatrix = [[], []];
+
+        for (let innerArr in boardMatrix) {
+            debug(boardMatrix[innerArr][innerArr], innerArr);
+            diagMatrix[0].push(boardMatrix[innerArr][innerArr])
+        }
+        
+        diagMatrix[1] = [boardMatrix[2][0], boardMatrix[1][1], boardMatrix[0][2]];
+        return checkRowWin(diagMatrix);
+    }
+
     const checkStatus = () => {
         clearStatus();
 
@@ -185,6 +203,9 @@ const gameLogic = (() => {
             return;
         }
 
+        if (checkDiagWin(boardArr)) {
+            return;
+        }
     };
 
     return {
@@ -235,7 +256,7 @@ const dialogManager = (() => {
 
         const p1NameEM = document.querySelector(ID_INP_P1_NAME);
         const p2NameEM = document.querySelector(ID_INP_P2_NAME);
-        
+
         const submitButton = document.querySelector(ID_BTN_SUBMIT_NAMES);
         submitButton.addEventListener('click', (event) => {
             if (dialog instanceof HTMLDialogElement) {
