@@ -88,34 +88,103 @@ const playerManager = (() => {
         }
     };
 
+    /**
+     * Returns player name based on the chosen player..!
+     * @param {string} markChoice 
+     */
+    const getPlayerFromMark = (markChoice) => {
+        for (let player in players) {
+            if (players[player].mark === markChoice) {
+                debug(players[player].name);
+                return players[player].name;
+            }
+        }
+    };
+
     return {
         initiatePlayers,
         showPlayers,
-        getError
+        getError,
+        getPlayerFromMark,
     }
 
 })();
 
-const gameBoard = (() => {
+const gameLogic = (() => {
     const choice = {
         X: 'X',
         O: 'O',
-        E: null
     };
 
-    const EMPTY = choice.E;
+    const EMPTY = null;
 
     let boardArr = [
-        [choice.X, choice.X, choice.O],
-        [choice.X, choice.X, choice.X],
+        [EMPTY, EMPTY, EMPTY],
+        [EMPTY, EMPTY, EMPTY],
         [EMPTY, EMPTY, EMPTY]
     ];
+
+
+    let status = {
+        win: false,
+        playerWhoWon: null,
+    };
+
+    const clearStatus = () => {
+        status.win = false;
+        status.playerWhoWon = null;
+    };
 
     const printBoard = () => {
         debug(boardArr);
     };
 
+    /**
+     * 
+     * @param {boardArr} boardMatrix 
+     * @returns {boolean} win
+     */
+    const checkRowWin = (boardMatrix) => {
+        return boardMatrix.some((singleRow) => {
+            let win = singleRow.every((mark) => singleRow[0] === mark);
+            if (win) {
+                status.win = win;
+                status.playerWhoWon = playerManager.getPlayerFromMark(singleRow[0]);
+                debug("Win condition met: ", status.win, status.playerWhoWon);
+            }
+            return win;
+        });
+    };
+
+    /**
+     * This code is practically "transposing the matrix... that's all.
+     * Note: I didn't replace it with .map().. because I understand my code!.
+     * 
+     * Then, sends data to checkRowWin() ---> 
+     * @param {boardArr} boardMatrix 
+     */
+    const checkColWin = (boardMatrix) => {
+        let colMatrix = [[], [], []];
+        for (let innerArr in boardMatrix) {
+            for (let index in boardMatrix[innerArr]) {
+                colMatrix[innerArr].push(boardMatrix[index][innerArr]);
+            }
+        }
+        debug("Transposed: ", colMatrix);
+        return checkRowWin(colMatrix);
+    };
+
     const checkStatus = () => {
+        clearStatus();
+
+        if (checkRowWin(boardArr)) {
+            return;
+        }
+
+        if (checkColWin(boardArr)) {
+            return;
+        }
+
     };
 
     return {
@@ -213,5 +282,5 @@ const dialogManager = (() => {
     };
 })();
 
-gameBoard.printBoard();
 dialogManager.registerDialog();
+gameLogic.checkStatus();
