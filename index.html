@@ -17,17 +17,18 @@
 
     <main class="main">
         <button type="button" id="btn-start" class="btn-start">Start Game</button>
-        <div class="board">
-            <button class="cell"></button>
-            <button class="cell"></button>
-            <button class="cell"></button>
-            <button class="cell"></button>
-            <button class="cell"></button>
-            <button class="cell"></button>
-            <button class="cell"></button>
-            <button class="cell"></button>
-            <button class="cell"></button>
+        <div class="board" id="gameBoard">
+            <button class="cell" data-index="0|0"></button>
+            <button class="cell" data-index="0|1"></button>
+            <button class="cell" data-index="0|2"></button>
+            <button class="cell" data-index="1|0"></button>
+            <button class="cell" data-index="1|1"></button>
+            <button class="cell" data-index="1|2"></button>
+            <button class="cell" data-index="2|0"></button>
+            <button class="cell" data-index="2|1"></button>
+            <button class="cell" data-index="2|2"></button>
         </div>
+        <p class="turn-msg" id="board-turn"></p>
 
 
         <dialog class="player-dialog" id="player-dialog">

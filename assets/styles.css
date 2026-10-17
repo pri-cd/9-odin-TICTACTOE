@@ -108,7 +108,7 @@ body {
 
     aspect-ratio: 1;
     align-self: center;
-    width: min(50vw, 400px);
+    width: min(50vw, 300px);
 
     background-color: black;
     display: grid;
@@ -118,7 +118,6 @@ body {
 
     box-shadow: 0px 0px 10px 3px var(--board-shadow);
 }
-
 
 .cell {
     background-color: var(--cell-bg);
@@ -135,6 +134,19 @@ body {
     transform: scale(0.98);
 }
 
+.turn-msg {
+    --turn-msg-fg: #78BC61;
+    
+    align-self: center;
+    font-size: 16px;
+    font-weight: bolder;
+    text-transform: uppercase;
+    color: var(--turn-msg-fg);
+
+    padding: 10px 20px;
+    border-radius: 20px;
+    background-color: rgba(0, 0, 0, 50%);
+}
 
 .player-dialog {
     --logo-height: 30px;

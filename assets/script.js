@@ -10,6 +10,7 @@ const playerManager = (() => {
 
     let players =
     {
+        initiated: false,
         player1: { name: "", mark: "" },
         player2: { name: "", mark: "" }
     }
@@ -71,6 +72,7 @@ const playerManager = (() => {
 
         initiateP1(p1Name, mark1);
         initiateP2(p2Name, mark2);
+        players.initiated = true;
         return ERR;
     }
 
@@ -101,29 +103,24 @@ const playerManager = (() => {
         }
     };
 
+    const getPlayers = () => {
+        if (players.initiated === true) {
+            return players;
+        }
+        return undefined;
+    };
+
     return {
         initiatePlayers,
         showPlayers,
         getError,
         getPlayerFromMark,
+        getPlayers,
     }
 
 })();
 
 const gameLogic = (() => {
-    const choice = {
-        X: 'X',
-        O: 'O',
-    };
-
-    const EMPTY = null;
-
-    let boardArr = [
-        [EMPTY, EMPTY, EMPTY],
-        [EMPTY, EMPTY, EMPTY],
-        [EMPTY, EMPTY, EMPTY]
-    ];
-
 
     let status = {
         win: false,
@@ -135,10 +132,6 @@ const gameLogic = (() => {
         status.playerWhoWon = null;
     };
 
-    const printBoard = () => {
-        debug(boardArr);
-    };
-
     /**
      * 
      * @param {Array} boardMatrix 
@@ -146,11 +139,15 @@ const gameLogic = (() => {
      */
     const checkRowWin = (boardMatrix) => {
         return boardMatrix.some((singleRow) => {
-            let win = singleRow.every((mark) => singleRow[0] === mark);
-            if (win) {
-                status.win = win;
-                status.playerWhoWon = playerManager.getPlayerFromMark(singleRow[0]);
-                debug("Win condition met: ", status.win, status.playerWhoWon);
+            let win = false;
+
+            if (singleRow[0] != null) {
+                win = singleRow.every((mark) => singleRow[0] === mark);
+                if (win) {
+                    status.win = win;
+                    status.playerWhoWon = playerManager.getPlayerFromMark(singleRow[0]);
+                    debug("Win condition met: ", status.win, status.playerWhoWon);
+                }
             }
             return win;
         });
@@ -170,7 +167,6 @@ const gameLogic = (() => {
                 colMatrix[innerArr].push(boardMatrix[index][innerArr]);
             }
         }
-        debug("Transposed: ", colMatrix);
         return checkRowWin(colMatrix);
     };
 
@@ -184,15 +180,19 @@ const gameLogic = (() => {
         let diagMatrix = [[], []];
 
         for (let innerArr in boardMatrix) {
-            debug(boardMatrix[innerArr][innerArr], innerArr);
             diagMatrix[0].push(boardMatrix[innerArr][innerArr])
         }
-        
+
         diagMatrix[1] = [boardMatrix[2][0], boardMatrix[1][1], boardMatrix[0][2]];
         return checkRowWin(diagMatrix);
     }
 
-    const checkStatus = () => {
+    /**
+     * Checks If Board is in win condition..! 
+     * @param {Array} boardArr 
+     * @returns 
+     */
+    const checkStatus = (boardArr) => {
         clearStatus();
 
         if (checkRowWin(boardArr)) {
@@ -209,8 +209,130 @@ const gameLogic = (() => {
     };
 
     return {
-        printBoard,
         checkStatus
+    };
+})();
+
+const boardManager = (() => {
+    const ID_GAME_BOARD = "#gameBoard";
+    const ID_TURN_MSG = "#board-turn";
+    const MSG_PLAYER_TURN = "'s Turn";
+
+    let turnSystem = {
+        prevTurn: undefined,
+        currTurn: undefined,
+        currPlyr: undefined,
+        prevMark: '',
+    };
+
+    const turnMsgEM = document.querySelector(ID_TURN_MSG);
+
+    const EMPTY = null;
+    let boardArr = [
+        [EMPTY, EMPTY, EMPTY],
+        [EMPTY, EMPTY, EMPTY],
+        [EMPTY, EMPTY, EMPTY]
+    ];
+
+    const resetTurnSystem = () => {
+        turnSystem.prevTurn = undefined;
+        turnSystem.currTurn = undefined;
+        turnSystem.currPlyr = undefined;
+
+        turnMsgEM.textContent = "";
+    };
+
+    const getBoard = () => {
+        return boardArr;
+    };
+
+    /**
+      * 
+      * @param {HTMLButtonElement} target 
+      * @returns 
+      */
+    const handleTurnSystem = (target = null) => {
+
+        const players = playerManager.getPlayers();
+        if (!turnSystem.currPlyr && target === null) {
+            /**
+             * This is when the system is starting for the first time we start with Player 1
+             * As, the first playable...
+             */
+
+            debug("Initiating Turn System!-");
+            if (turnMsgEM instanceof HTMLParagraphElement) {
+                turnMsgEM.textContent = players.player1.name + MSG_PLAYER_TURN;
+                turnSystem.currPlyr = players.player1.name;
+                return;
+            }
+        }
+
+        if (turnSystem.currPlyr === players.player1.name) {
+            turnMsgEM.textContent = players.player2.name + MSG_PLAYER_TURN;
+            turnSystem.prevTurn = turnSystem.currPlyr;
+
+            turnSystem.prevMark = players.player1.mark;
+            turnSystem.currPlyr = players.player2.name;
+            debug("Prev Turn: Player1. Now, Player2's Turn..!");
+            return;
+        }
+
+        if (turnSystem.currPlyr === players.player2.name) {
+            turnMsgEM.textContent = players.player1.name + MSG_PLAYER_TURN;
+            turnSystem.prevTurn = turnSystem.currPlyr;
+
+            turnSystem.prevMark = players.player2.mark;
+            turnSystem.currPlyr = players.player1.name;
+            debug("Prev Turn: Player2. Now, Player1's Turn..!");
+            return;
+        }
+    };
+
+
+    /**
+     * 
+     * @param {HTMLButtonElement} target 
+     */
+    const registerArea = (target) => {
+        const getIndex = target.dataset.index;
+        const index = Array(Number(getIndex.split('|')[0]), Number(getIndex.split('|')[1]));
+        debug("Registering Area, ", index, ", Turn (Name): ", turnSystem.prevTurn, ", With: ", turnSystem.prevMark);
+
+        boardArr[index[0]][index[1]] = turnSystem.prevMark;
+        debug(boardArr);
+    };
+
+
+    /**
+     * The event handler for when the user clicks on the grid-!
+     * @param {Event} event 
+     */
+    const handlePlayerClick = (event) => {
+        const target = event.target;
+        if (target instanceof HTMLButtonElement) {
+            debug("Cell Pressed: ", target);
+            handleTurnSystem(target);
+            registerArea(target);
+            gameLogic.checkStatus(boardArr);
+        }
+    };
+
+    /**
+     * This registers- the gameBoard with ---> click listeners! 
+     * Called for the first time when the game is starting, 
+     * After dialog is submmitted!..
+     * 
+     */
+    const registerGameBoard = () => {
+        const board = document.querySelector(ID_GAME_BOARD);
+        board.addEventListener('click', handlePlayerClick);
+    };
+
+    return {
+        registerGameBoard,
+        handleTurnSystem,
+        getBoard,
     };
 })();
 
@@ -278,6 +400,9 @@ const dialogManager = (() => {
                         p2NameEM.value,
                         p2MarkEM.value
                     )) {
+                        boardManager.registerGameBoard();
+                        boardManager.handleTurnSystem();
+
                         playerManager.showPlayers();
                         p1NameEM.value = "";
                         p2NameEM.value = "";
@@ -304,4 +429,4 @@ const dialogManager = (() => {
 })();
 
 dialogManager.registerDialog();
-gameLogic.checkStatus();
+gameLogic.checkStatus(boardManager.getBoard());
