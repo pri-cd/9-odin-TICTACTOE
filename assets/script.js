@@ -237,9 +237,8 @@ const boardManager = (() => {
     const resetTurnSystem = () => {
         turnSystem.prevTurn = undefined;
         turnSystem.currTurn = undefined;
-        turnSystem.currPlyr = undefined;
-
         turnMsgEM.textContent = "";
+        turnSystem.currPlyr = undefined;
     };
 
     const getBoard = () => {
