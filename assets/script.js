@@ -136,12 +136,14 @@ const gameLogic = (() => {
 
     let status = {
         win: false,
+        draw: false,
         playerWhoWon: null,
         mark: '',
     };
 
     const resetStatus = () => {
         status.win = false;
+        status.draw = false;
         status.playerWhoWon = null;
         status.mark = "";
     };
@@ -176,9 +178,9 @@ const gameLogic = (() => {
      */
     const checkColWin = (boardMatrix) => {
         let colMatrix = [[], [], []];
-        for (let innerArr in boardMatrix) {
-            for (let index in boardMatrix[innerArr]) {
-                colMatrix[innerArr].push(boardMatrix[index][innerArr]);
+        for (let [rowIdx, innerRow] of boardMatrix.entries()) {
+            for (let [colIdx, mark] of innerRow.entries()) {
+                colMatrix[colIdx].push(mark);
             }
         }
         return checkRowWin(colMatrix);
@@ -193,9 +195,9 @@ const gameLogic = (() => {
     const checkDiagWin = (boardMatrix) => {
         let diagMatrix = [[], []];
 
-        for (let innerArr in boardMatrix) {
-            diagMatrix[0].push(boardMatrix[innerArr][innerArr])
-        }
+        diagMatrix[0] = boardMatrix.map((innerArr, index) => {
+            return innerArr[index];
+        });
 
         diagMatrix[1] = [boardMatrix[2][0], boardMatrix[1][1], boardMatrix[0][2]];
         return checkRowWin(diagMatrix);
@@ -225,18 +227,25 @@ const gameLogic = (() => {
                 win = true;
                 break;
             }
+
+            if (boardManager.getCount() === 9) {
+                win = false;
+                status.win = win;
+                status.draw = true;
+                break;
+            }
         } while (false);
 
         return win;
     };
 
-    const getPlayerWhoWon = () => {
+    const getBoardStatus = () => {
         return status;
     };
 
     return {
         checkStatus,
-        getPlayerWhoWon,
+        getBoardStatus,
         resetStatus,
     };
 })();
@@ -247,6 +256,7 @@ const boardManager = (() => {
     const MSG_PLAYER_TURN = "'s Turn";
 
     let turnSystem = {
+        count: 0,
         prevTurn: undefined,
         currTurn: undefined,
         currPlyr: undefined,
@@ -269,48 +279,56 @@ const boardManager = (() => {
     /**
       * 
       * @param {HTMLButtonElement} target 
-      * @returns 
+      * @returns results
       */
     const handleTurnSystem = (target = null) => {
         const players = playerManager.getPlayers();
-        if (!turnSystem.currPlyr && target === null) {
-            /**
-             * This is when the system is starting for the first time 
-             * we start with Player 1 -> As, the first playable...
-             */
-            debug("Initiating Turn System!-");
-            if (turnMsgEM instanceof HTMLParagraphElement) {
-                turnMsgEM.textContent = players.player1.name + MSG_PLAYER_TURN;
-                turnSystem.currPlyr = players.player1.name;
-                return;
-            }
-        }
+        let successInteraction = false;
 
-        if (target.textContent === "") {
-            /**
-             * > "target.textContent == EMPTY" this condition is here, 
-             * > Because, If- the cell is already holding a symbol, we don't touch it!..
-             */
-            if (turnSystem.currPlyr === players.player1.name) {
-                turnMsgEM.textContent = players.player2.name + MSG_PLAYER_TURN;
-                turnSystem.prevTurn = turnSystem.currPlyr;
-
-                turnSystem.prevMark = players.player1.mark;
-                turnSystem.currPlyr = players.player2.name;
-                debug("Prev Turn: Player1. Now, Player2's Turn..!");
-                return;
+        do {
+            if (!turnSystem.currPlyr && target === null) {
+                /**
+                 * This is when the system is starting for the first time 
+                 * we start with Player 1 -> As, the first playable...
+                 */
+                debug("Initiating Turn System!-");
+                if (turnMsgEM instanceof HTMLParagraphElement) {
+                    turnMsgEM.textContent = players.player1.name + MSG_PLAYER_TURN;
+                    turnSystem.currPlyr = players.player1.name;
+                    successInteraction = true;
+                    break;
+                }
             }
 
-            if (turnSystem.currPlyr === players.player2.name) {
-                turnMsgEM.textContent = players.player1.name + MSG_PLAYER_TURN;
-                turnSystem.prevTurn = turnSystem.currPlyr;
+            if (target.textContent === "") {
+                /**
+                 * > "target.textContent == EMPTY" this condition is here, 
+                 * > Because, If- the cell is already holding a symbol, we don't touch it!..
+                 */
+                if (turnSystem.currPlyr === players.player1.name) {
+                    turnMsgEM.textContent = players.player2.name + MSG_PLAYER_TURN;
+                    turnSystem.prevTurn = turnSystem.currPlyr;
 
-                turnSystem.prevMark = players.player2.mark;
-                turnSystem.currPlyr = players.player1.name;
-                debug("Prev Turn: Player2. Now, Player1's Turn..!");
-                return;
+                    turnSystem.prevMark = players.player1.mark;
+                    turnSystem.currPlyr = players.player2.name;
+                    debug("Prev Turn: Player1. Now, Player2's Turn..!");
+                    successInteraction = true;
+                    break;
+                }
+
+                if (turnSystem.currPlyr === players.player2.name) {
+                    turnMsgEM.textContent = players.player1.name + MSG_PLAYER_TURN;
+                    turnSystem.prevTurn = turnSystem.currPlyr;
+
+                    turnSystem.prevMark = players.player2.mark;
+                    turnSystem.currPlyr = players.player1.name;
+                    debug("Prev Turn: Player2. Now, Player1's Turn..!");
+                    successInteraction = true;
+                    break;
+                }
             }
-        }
+        } while (false);
+        return successInteraction;
     };
 
     /**
@@ -322,11 +340,21 @@ const boardManager = (() => {
         const index = Array(Number(getIndex.split('|')[0]), Number(getIndex.split('|')[1]));
 
         if (boardArr[index[0]][index[1]] === EMPTY) {
-            debug("Registering Area, ", index, ", Turn (Name): ", turnSystem.prevTurn, ", With: ", turnSystem.prevMark);
             boardArr[index[0]][index[1]] = turnSystem.prevMark;
             target.textContent = turnSystem.prevMark;
+            ++turnSystem.count;
         }
         debug(boardArr);
+    };
+
+    /**
+     * 
+     * @param {HTMLButtonElement} target 
+     */
+    const handleTurn = (target) => {
+        if (handleTurnSystem(target)) {
+            registerArea(target);
+        }
     };
 
     /**
@@ -337,18 +365,25 @@ const boardManager = (() => {
         const target = event.target;
         if (target instanceof HTMLButtonElement) {
             debug("Cell Pressed: ", target);
-            handleTurnSystem(target);
-            registerArea(target);
+            handleTurn(target);
 
             /** 
              * @Info: If the user wins.. 
              * we'll have to stop the loop and, print the winner!.. 
              */
-            if (gameLogic.checkStatus(boardArr)) {
-                const status = gameLogic.getPlayerWhoWon();
+            const winCondition = gameLogic.checkStatus(boardArr);
+            const status = gameLogic.getBoardStatus();
+
+            if (winCondition) {
                 debug("A Player: ", status.playerWhoWon, " has won! with Mark: ", status.mark);
+                dialogManager.gameOverDialogHandler();
                 debug("Resetting board!");
-                dialogManager.WinDialogHandler();
+            }
+            else {
+                if (status.draw) {
+                    debug("A draw has occured!");
+                    dialogManager.gameOverDialogHandler();
+                }
             }
         }
     };
@@ -364,19 +399,24 @@ const boardManager = (() => {
         board.addEventListener('click', handlePlayerClick);
     };
 
+    const getCount = () => {
+        return turnSystem.count;
+    };
+
     const resetTurnSystem = () => {
         turnSystem.prevTurn = undefined;
         turnSystem.currTurn = undefined;
         turnMsgEM.textContent = "";
         turnSystem.currPlyr = undefined;
+        turnSystem.count = 0;
     };
 
     const resetBoardMarks = () => {
         const gameBoard = document.querySelector(ID_GAME_BOARD);
         const allCells = Array.from(gameBoard.querySelectorAll('button'));
-        for (let cell in allCells) {
-            if (allCells[cell] instanceof HTMLButtonElement) {
-                allCells[cell].textContent = "";
+        for (let cell of allCells) {
+            if (cell instanceof HTMLButtonElement) {
+                cell.textContent = "";
             }
         }
     };
@@ -404,6 +444,7 @@ const boardManager = (() => {
         handleTurnSystem,
         getBoard,
         resetBoard,
+        getCount,
     };
 })();
 
@@ -491,21 +532,46 @@ const dialogManager = (() => {
         });
     };
 
-    const WinDialogHandler = () => {
+    const registergameOverDialogListener = () => {
         const ID_BTN_DIALOG_CLOSE = "#close-win-dialog";
         const winDialogCloseBTN = document.querySelector(ID_BTN_DIALOG_CLOSE);
+        winDialogCloseBTN.addEventListener('click', (event) => {
+            winDialog.close();
+            boardManager.resetBoard();
+        });
+    };
+
+    const gameOverDialogHandler = () => {
+        const ID_IMG_HOLDER = "#game-result-img";
+        const ID_RESULT_HOLDER = "#game-result-msg";
+
+        const IMG_PATH_WIN = "./assets/icons/win.png";
+        const IMG_PATH_DRW = "./assets/icons/draw.png";
+
+        const resultMessageEM = document.querySelector(ID_RESULT_HOLDER);
+        const imgHolder = document.querySelector(ID_IMG_HOLDER);
+
+        const boardStatus = gameLogic.getBoardStatus();
+
+        if (boardStatus.draw) {
+            imgHolder.setAttribute('src', IMG_PATH_DRW);
+            resultMessageEM.textContent = "Draw!";
+        }
+        else {
+            if (boardStatus.win) {
+                imgHolder.setAttribute('src', IMG_PATH_WIN);
+                resultMessageEM.textContent = `Player: ${boardStatus.playerWhoWon} won the game!!`
+            }
+        }
 
         if (winDialog instanceof HTMLDialogElement) {
             winDialog.showModal();
-            winDialogCloseBTN.addEventListener('click', (event) => {
-                winDialog.close();
-                boardManager.resetBoard();
-            });
         }
     };
 
     const registerDialog = () => {
         registerStartGame();
+        registergameOverDialogListener();
         registerSubmit();
     };
 
@@ -513,9 +579,8 @@ const dialogManager = (() => {
     return {
         registerDialog,
         clearErrorUI,
-        WinDialogHandler,
+        gameOverDialogHandler,
     };
 })();
 
 dialogManager.registerDialog();
-gameLogic.checkStatus(boardManager.getBoard());

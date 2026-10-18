@@ -120,9 +120,14 @@ body {
 }
 
 .cell {
+    --mark-fg: #EE6123;
+
     background-color: var(--cell-bg);
     border: none;
     transition: all 0.1s ease-in-out;
+    color: var(--mark-fg);
+    font-size: 32px;
+    font-weight: bolder;
 }
 
 .cell:hover {
@@ -148,7 +153,7 @@ body {
     background-color: rgba(0, 0, 0, 50%);
 }
 
-.player-dialog, 
+.player-dialog,
 .player-win-dialog {
     --logo-height: 30px;
     --mark-height: 15px;
@@ -157,15 +162,17 @@ body {
     padding: 10px 30px;
     border: 1px solid black;
     border-radius: 5px;
+    width: 30vw;
 }
 
-.player-dialog:open {
+.player-dialog:open,
+.player-win-dialog:open {
     display: flex;
     flex-direction: column;
     gap: 10px;
 }
 
-.player-dialog::backdrop, 
+.player-dialog::backdrop,
 .player-win-dialog::backdrop {
     background: rgb(0 0 0 / 0.8);
 }
@@ -262,4 +269,22 @@ body {
     border: 2px solid black;
 }
 
-.player-win-dialog {}
+.player-win-dialog {
+    --result-img-height: 50px;
+
+}
+
+.player-win-dialog .win-player-msg {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    align-items: center;
+}
+
+.player-win-dialog img {
+    height: var(--result-img-height);
+}
+
+.player-win-dialog h2 {
+    font-size: 24px;
+}
