@@ -190,22 +190,30 @@ const gameLogic = (() => {
     /**
      * Checks If Board is in win condition..! 
      * @param {Array} boardArr 
-     * @returns 
+     * @returns (If user wins!)..
      */
     const checkStatus = (boardArr) => {
         clearStatus();
+        let win = false;
 
-        if (checkRowWin(boardArr)) {
-            return;
-        }
+        do {
+            if (checkRowWin(boardArr)) {
+                win = true;
+                break;
+            }
 
-        if (checkColWin(boardArr)) {
-            return;
-        }
+            if (checkColWin(boardArr)) {
+                win = true;
+                break;
+            }
 
-        if (checkDiagWin(boardArr)) {
-            return;
-        }
+            if (checkDiagWin(boardArr)) {
+                win = true;
+                break;
+            }
+        } while (false);
+
+        return win;
     };
 
     return {
