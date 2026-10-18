@@ -32,6 +32,17 @@ const playerManager = (() => {
     let ERR = false;
     let ERRStr = "";
 
+    const resetPlayerManager = () => {
+        ERR = false;
+        ERRStr = "";
+
+        players.initiated = false;
+        players.player1.name = "";
+        players.player1.mark = "";
+        players.player2.name = "";
+        players.player2.mark = "";
+    };
+
     /**
      * This will verify and initiate players in game!-
      * @param {string} name1 
@@ -116,6 +127,7 @@ const playerManager = (() => {
         getError,
         getPlayerFromMark,
         getPlayers,
+        resetPlayerManager,
     }
 
 })();
@@ -125,11 +137,13 @@ const gameLogic = (() => {
     let status = {
         win: false,
         playerWhoWon: null,
+        mark: '',
     };
 
-    const clearStatus = () => {
+    const resetStatus = () => {
         status.win = false;
         status.playerWhoWon = null;
+        status.mark = "";
     };
 
     /**
@@ -146,7 +160,7 @@ const gameLogic = (() => {
                 if (win) {
                     status.win = win;
                     status.playerWhoWon = playerManager.getPlayerFromMark(singleRow[0]);
-                    debug("Win condition met: ", status.win, status.playerWhoWon);
+                    status.mark = singleRow[0];
                 }
             }
             return win;
@@ -193,7 +207,7 @@ const gameLogic = (() => {
      * @returns (If user wins!)..
      */
     const checkStatus = (boardArr) => {
-        clearStatus();
+        resetStatus();
         let win = false;
 
         do {
@@ -216,8 +230,14 @@ const gameLogic = (() => {
         return win;
     };
 
+    const getPlayerWhoWon = () => {
+        return status;
+    };
+
     return {
-        checkStatus
+        checkStatus,
+        getPlayerWhoWon,
+        resetStatus,
     };
 })();
 
@@ -242,13 +262,6 @@ const boardManager = (() => {
         [EMPTY, EMPTY, EMPTY]
     ];
 
-    const resetTurnSystem = () => {
-        turnSystem.prevTurn = undefined;
-        turnSystem.currTurn = undefined;
-        turnMsgEM.textContent = "";
-        turnSystem.currPlyr = undefined;
-    };
-
     const getBoard = () => {
         return boardArr;
     };
@@ -259,14 +272,12 @@ const boardManager = (() => {
       * @returns 
       */
     const handleTurnSystem = (target = null) => {
-
         const players = playerManager.getPlayers();
         if (!turnSystem.currPlyr && target === null) {
             /**
-             * This is when the system is starting for the first time we start with Player 1
-             * As, the first playable...
+             * This is when the system is starting for the first time 
+             * we start with Player 1 -> As, the first playable...
              */
-
             debug("Initiating Turn System!-");
             if (turnMsgEM instanceof HTMLParagraphElement) {
                 turnMsgEM.textContent = players.player1.name + MSG_PLAYER_TURN;
@@ -275,27 +286,32 @@ const boardManager = (() => {
             }
         }
 
-        if (turnSystem.currPlyr === players.player1.name) {
-            turnMsgEM.textContent = players.player2.name + MSG_PLAYER_TURN;
-            turnSystem.prevTurn = turnSystem.currPlyr;
+        if (target.textContent === "") {
+            /**
+             * > "target.textContent == EMPTY" this condition is here, 
+             * > Because, If- the cell is already holding a symbol, we don't touch it!..
+             */
+            if (turnSystem.currPlyr === players.player1.name) {
+                turnMsgEM.textContent = players.player2.name + MSG_PLAYER_TURN;
+                turnSystem.prevTurn = turnSystem.currPlyr;
 
-            turnSystem.prevMark = players.player1.mark;
-            turnSystem.currPlyr = players.player2.name;
-            debug("Prev Turn: Player1. Now, Player2's Turn..!");
-            return;
-        }
+                turnSystem.prevMark = players.player1.mark;
+                turnSystem.currPlyr = players.player2.name;
+                debug("Prev Turn: Player1. Now, Player2's Turn..!");
+                return;
+            }
 
-        if (turnSystem.currPlyr === players.player2.name) {
-            turnMsgEM.textContent = players.player1.name + MSG_PLAYER_TURN;
-            turnSystem.prevTurn = turnSystem.currPlyr;
+            if (turnSystem.currPlyr === players.player2.name) {
+                turnMsgEM.textContent = players.player1.name + MSG_PLAYER_TURN;
+                turnSystem.prevTurn = turnSystem.currPlyr;
 
-            turnSystem.prevMark = players.player2.mark;
-            turnSystem.currPlyr = players.player1.name;
-            debug("Prev Turn: Player2. Now, Player1's Turn..!");
-            return;
+                turnSystem.prevMark = players.player2.mark;
+                turnSystem.currPlyr = players.player1.name;
+                debug("Prev Turn: Player2. Now, Player1's Turn..!");
+                return;
+            }
         }
     };
-
 
     /**
      * 
@@ -304,12 +320,14 @@ const boardManager = (() => {
     const registerArea = (target) => {
         const getIndex = target.dataset.index;
         const index = Array(Number(getIndex.split('|')[0]), Number(getIndex.split('|')[1]));
-        debug("Registering Area, ", index, ", Turn (Name): ", turnSystem.prevTurn, ", With: ", turnSystem.prevMark);
 
-        boardArr[index[0]][index[1]] = turnSystem.prevMark;
+        if (boardArr[index[0]][index[1]] === EMPTY) {
+            debug("Registering Area, ", index, ", Turn (Name): ", turnSystem.prevTurn, ", With: ", turnSystem.prevMark);
+            boardArr[index[0]][index[1]] = turnSystem.prevMark;
+            target.textContent = turnSystem.prevMark;
+        }
         debug(boardArr);
     };
-
 
     /**
      * The event handler for when the user clicks on the grid-!
@@ -321,7 +339,17 @@ const boardManager = (() => {
             debug("Cell Pressed: ", target);
             handleTurnSystem(target);
             registerArea(target);
-            gameLogic.checkStatus(boardArr);
+
+            /** 
+             * @Info: If the user wins.. 
+             * we'll have to stop the loop and, print the winner!.. 
+             */
+            if (gameLogic.checkStatus(boardArr)) {
+                const status = gameLogic.getPlayerWhoWon();
+                debug("A Player: ", status.playerWhoWon, " has won! with Mark: ", status.mark);
+                debug("Resetting board!");
+                dialogManager.WinDialogHandler();
+            }
         }
     };
 
@@ -336,16 +364,55 @@ const boardManager = (() => {
         board.addEventListener('click', handlePlayerClick);
     };
 
+    const resetTurnSystem = () => {
+        turnSystem.prevTurn = undefined;
+        turnSystem.currTurn = undefined;
+        turnMsgEM.textContent = "";
+        turnSystem.currPlyr = undefined;
+    };
+
+    const resetBoardMarks = () => {
+        const gameBoard = document.querySelector(ID_GAME_BOARD);
+        const allCells = Array.from(gameBoard.querySelectorAll('button'));
+        for (let cell in allCells) {
+            if (allCells[cell] instanceof HTMLButtonElement) {
+                allCells[cell].textContent = "";
+            }
+        }
+    };
+
+    const unregisterGameArea = () => {
+        const board = document.querySelector(ID_GAME_BOARD);
+        board.removeEventListener('click', handlePlayerClick);
+    };
+
+    const resetBoard = () => {
+        resetTurnSystem();
+        playerManager.resetPlayerManager();
+        gameLogic.resetStatus();
+        boardArr = [
+            [EMPTY, EMPTY, EMPTY],
+            [EMPTY, EMPTY, EMPTY],
+            [EMPTY, EMPTY, EMPTY]
+        ];
+        resetBoardMarks();
+        unregisterGameArea();
+    };
+
     return {
         registerGameBoard,
         handleTurnSystem,
         getBoard,
+        resetBoard,
     };
 })();
 
 const dialogManager = (() => {
     const ID_DIALOG_PLAYER_INP = "#player-dialog";
     const ID_DIALOG_ERR = "#dialog-error";
+    const ID_DIALOG_PLAYER_WIN = "#player-win-dialog";
+
+    const winDialog = document.querySelector(ID_DIALOG_PLAYER_WIN);
     const dialog = document.querySelector(ID_DIALOG_PLAYER_INP);
     const errEM = document.querySelector(ID_DIALOG_ERR);
 
@@ -424,6 +491,19 @@ const dialogManager = (() => {
         });
     };
 
+    const WinDialogHandler = () => {
+        const ID_BTN_DIALOG_CLOSE = "#close-win-dialog";
+        const winDialogCloseBTN = document.querySelector(ID_BTN_DIALOG_CLOSE);
+
+        if (winDialog instanceof HTMLDialogElement) {
+            winDialog.showModal();
+            winDialogCloseBTN.addEventListener('click', (event) => {
+                winDialog.close();
+                boardManager.resetBoard();
+            });
+        }
+    };
+
     const registerDialog = () => {
         registerStartGame();
         registerSubmit();
@@ -431,7 +511,9 @@ const dialogManager = (() => {
 
 
     return {
-        registerDialog
+        registerDialog,
+        clearErrorUI,
+        WinDialogHandler,
     };
 })();
 

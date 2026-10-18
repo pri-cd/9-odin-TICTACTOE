@@ -136,7 +136,7 @@ body {
 
 .turn-msg {
     --turn-msg-fg: #78BC61;
-    
+
     align-self: center;
     font-size: 16px;
     font-weight: bolder;
@@ -148,7 +148,8 @@ body {
     background-color: rgba(0, 0, 0, 50%);
 }
 
-.player-dialog {
+.player-dialog, 
+.player-win-dialog {
     --logo-height: 30px;
     --mark-height: 15px;
 
@@ -164,7 +165,8 @@ body {
     gap: 10px;
 }
 
-.player-dialog::backdrop {
+.player-dialog::backdrop, 
+.player-win-dialog::backdrop {
     background: rgb(0 0 0 / 0.8);
 }
 
@@ -259,3 +261,5 @@ body {
     border-radius: 50px;
     border: 2px solid black;
 }
+
+.player-win-dialog {}
