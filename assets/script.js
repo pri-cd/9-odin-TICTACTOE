@@ -377,12 +377,13 @@ const boardManager = (() => {
             if (winCondition) {
                 debug("A Player: ", status.playerWhoWon, " has won! with Mark: ", status.mark);
                 dialogManager.gameOverDialogHandler();
-                debug("Resetting board!");
+                resetTurnMsg();
             }
             else {
                 if (status.draw) {
                     debug("A draw has occured!");
                     dialogManager.gameOverDialogHandler();
+                    resetTurnMsg();
                 }
             }
         }
@@ -403,10 +404,14 @@ const boardManager = (() => {
         return turnSystem.count;
     };
 
+    const resetTurnMsg = () => {
+        turnMsgEM.textContent = "";
+    };
+
     const resetTurnSystem = () => {
         turnSystem.prevTurn = undefined;
         turnSystem.currTurn = undefined;
-        turnMsgEM.textContent = "";
+        resetTurnMsg();
         turnSystem.currPlyr = undefined;
         turnSystem.count = 0;
     };
